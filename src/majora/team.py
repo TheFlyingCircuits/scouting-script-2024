@@ -1,4 +1,4 @@
-from majora import Pits
+from majora.pits import Pits
 
 
 class Team:

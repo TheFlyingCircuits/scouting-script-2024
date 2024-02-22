@@ -9,4 +9,10 @@ packages = ["src/majora"]
 version = "1.0.0"
 name = "majora"
 requires-python = ">=3.11"
-dependencies = ["polars"]
+dependencies = [
+    "polars==0.20.7",
+    "openpyxl==3.1.2",
+    "statbotics==2.0.3",
+    "requests==2.31.0",
+    "grequests==0.7.0",
+]

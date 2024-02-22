@@ -1,5 +1,6 @@
 # Project specific ignores
 .DS_Store
+auth.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
