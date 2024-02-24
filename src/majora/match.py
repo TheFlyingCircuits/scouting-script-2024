@@ -2,7 +2,12 @@ from majora import load
 
 
 class Match:
-    """Represents a single team's match data"""
+    """Represents a single team's match data
+    TODO: tell the team to add in different comment boxes for different categories (all optional boxes)
+
+    TODO: sentiment analysis on comments
+    talk to students to think of names for the personalities
+    """
 
     def __init__(self, row):
         self.match_number = int(row[3])
@@ -34,6 +39,9 @@ class Match:
     def __repr__(self) -> str:
         return self.__dict__.__repr__()
 
+    def to_list(self) -> list:
+        return list(self.__dict__.values())
+
     @property
     def total_pts_auto(self):
         total = 2 * self.notes_scored_in_amp_auto + \
@@ -56,3 +64,8 @@ class Match:
         total = 5 * self.notes_scored_in_speaker_auto + \
             2 * self.notes_scored_in_speaker_tele
         return total
+
+    @property
+    def total_onstage(self):
+        # TODO:
+        ...
