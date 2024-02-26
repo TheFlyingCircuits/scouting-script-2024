@@ -28,16 +28,13 @@ class Match:
         self.defense = (row[13] == "Yes")
         self.rating_auto = row[14]
         self.rating_speed = row[15]
-        self.rating_game_piece_pickup = row[16]
-        self.rating_game_piece_scoring = row[17]
+        self.rating_pickup = row[16]
+        self.rating_scoring = row[17]
         self.rating_driver = row[18]
         self.rating_balance = row[19]
         self.rating_pick = row[20]
         self.comments_broken = row[21]
         self.comments_details = row[22]
-
-    def __repr__(self) -> str:
-        return self.__dict__.__repr__()
 
     def to_list(self) -> list:
         return list(self.__dict__.values())
@@ -69,3 +66,42 @@ class Match:
     def total_onstage(self):
         # TODO:
         ...
+
+    def _quantify_rating(self, s: str) -> int:
+        match s:
+            case "Bad":
+                return 1
+            case "OK":
+                return 2
+            case "Good":
+                return 3
+            case _:
+                raise ValueError(f"Cannot convert a rating of \"{s}\" to a number.")
+
+    @property
+    def rating_auto_quantified(self):
+        return self._quantify_rating(self.rating_auto)
+
+    @property
+    def rating_speed_quantified(self):
+        return self._quantify_rating(self.rating_speed)
+
+    @property
+    def rating_pickup_quantified(self):
+        return self._quantify_rating(self.rating_pickup)
+
+    @property
+    def rating_scoring_quantified(self):
+        return self._quantify_rating(self.rating_scoring)
+
+    @property
+    def rating_driver_quantified(self):
+        return self._quantify_rating(self.rating_driver)
+
+    @property
+    def rating_balance_quantified(self):
+        return self._quantify_rating(self.rating_balance)
+
+    @property
+    def rating_pick_quantified(self):
+        return self._quantify_rating(self.rating_pick)

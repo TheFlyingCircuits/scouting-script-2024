@@ -10,32 +10,35 @@ from majora.match import Match
 from majora.team import Team
 
 
-def load_all_team_data():
+def load_all_team_data(field_data_path: Path, pit_data_path: Path):
     team_data = {}
 
-    load_field_scouting_data(team_data)
-    add_pit_scouting_data(team_data)
-    add_tba_data(team_data)
-    add_statbotics_data(team_data)
+    load_field_scouting_data(team_data, field_data_path)
+    add_pit_scouting_data(team_data, pit_data_path)
+
+    # TODO:
+    # add_tba_data(team_data)
+    # add_statbotics_data(team_data)
 
     return team_data
 
 
 def extract_max_value(values_as_text: str) -> int:
-    split_values = values_as_text.split(';')
+    split_values = values_as_text.split(',')
 
     max_value = 0
     for value in split_values:
         value = int(value)
+
         if value > max_value:
             max_value = value
 
     return max_value
 
 
-def load_field_scouting_data(team_data):
+def load_field_scouting_data(team_data, field_data_path):
     # Opens the CSV file that we download from Google Sheets
-    with open(config.FIELD_DATA_CSV_PATH, "r") as f:
+    with open(field_data_path, "r") as f:
         # Helps us read the CSV file easier
         reader = csv.reader(f)
 
@@ -59,8 +62,8 @@ def load_field_scouting_data(team_data):
             team_data[team_number].matches.append(match_data)
 
 
-def add_pit_scouting_data(team_data):
-    with open(config.PIT_DATA_CSV_PATH, "r") as f:
+def add_pit_scouting_data(team_data, pit_data_path):
+    with open(pit_data_path, "r") as f:
         # Helps us read the CSV file easier
         reader = csv.reader(f)
 
@@ -82,12 +85,11 @@ def add_pit_scouting_data(team_data):
 
 
 def load_auth():
-    if Path(__file__).parent.parent.parent != config.ROOT_FOLDER_PATH:
-        raise FileNotFoundError("This script must be executed from within the "
-                                f"{config.ROOT_FOLDER_PATH.name} folder!")
-
-    with open("auth.json", "r") as f:
-        return json.loads(f.read())
+    try:
+        with open("auth.json", "r") as f:
+            return json.loads(f.read())
+    except FileNotFoundError:
+        raise FileNotFoundError("Failed to find auth.json file.")
 
 
 def add_statbotics_data(team_data):

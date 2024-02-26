@@ -8,9 +8,8 @@ packages = ["src/majora"]
 [project]
 version = "1.0.0"
 name = "majora"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
-    "polars==0.20.7",
     "openpyxl==3.1.2",
     "statbotics==2.0.3",
     "requests==2.31.0",
