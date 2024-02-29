@@ -5,6 +5,8 @@ class TeamStats:
 def add_statistics(team_data: dict):
     rankings = add_rankings(team_data)
 
+    return rankings
+
 
 def add_rankings(team_data: dict):
     categories = {

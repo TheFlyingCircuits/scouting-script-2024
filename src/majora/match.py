@@ -63,9 +63,28 @@ class Match:
         return total
 
     @property
-    def total_onstage(self):
-        # TODO:
-        ...
+    def total_notes_auto(self):
+        return self.notes_scored_in_amp_auto + self.notes_scored_in_speaker_auto
+
+    @property
+    def total_notes_tele(self):
+        return self.notes_scored_in_amp_tele + self.notes_scored_in_speaker_tele
+
+    @property
+    def total_notes_amp(self):
+        return self.notes_scored_in_amp_auto + self.notes_scored_in_amp_tele
+
+    @property
+    def total_notes_speaker(self):
+        return self.notes_scored_in_speaker_auto + self.notes_scored_in_speaker_tele
+
+    # @property
+    # def total_onstage(self):
+    #     return self.onstage_with_harmony + self.onstage_without_harmony
+
+    @property
+    def total_notes(self):
+        return self.total_notes_auto + self.total_notes_tele
 
     def _quantify_rating(self, s: str) -> int:
         match s:

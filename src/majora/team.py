@@ -127,3 +127,11 @@ class Team:
     @property
     def avg_rating_pick(self):
         return sum([match.rating_pick_quantified for match in self.matches]) / self.num_matches if self.num_matches else 0
+
+    @property
+    def total_notes_amp(self):
+        return sum([match.total_notes_amp for match in self.matches])
+
+    @property
+    def total_notes_speaker(self):
+        return sum([match.total_notes_speaker for match in self.matches])
