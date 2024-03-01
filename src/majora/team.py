@@ -10,6 +10,7 @@ class Team:
         self.matches = []
         self.pits = Pits()
         self.stats = TeamStats()
+        self.statbotics = {}
 
     @property
     def num_matches(self):

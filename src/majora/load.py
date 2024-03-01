@@ -50,7 +50,7 @@ def load_field_scouting_data(team_data, field_data_path):
                 continue
 
             # Extract the team number
-            team_number = row[2]
+            team_number = row[3]
 
             # if team has not been seen before add a new entry to the dictionary
             if team_number not in team_data.keys():

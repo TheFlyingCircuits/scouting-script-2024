@@ -1,11 +1,46 @@
+import time
+
+import gevent
+from statbotics import Statbotics
+
+from majora import config
+
+
 class TeamStats:
     rankings: dict
 
 
 def add_statistics(team_data: dict):
+    add_statbotics(team_data)
     rankings = add_rankings(team_data)
 
     return rankings
+
+
+def add_statbotics(team_data: dict):
+    start_time = time.time()
+
+    threads = [
+        gevent.spawn(get_statbotics_for_team, team_number)
+        for team_number, _ in team_data.items()
+    ]
+
+    results = [
+        thread.get()
+        for thread in threads
+    ]
+
+    for team_number, sb_data in results:
+        team_data[team_number].statbotics = sb_data
+
+    end_time = time.time() - start_time
+
+    print(f"Finished getting statbotics data in {end_time:.2f}s.")
+
+
+def get_statbotics_for_team(team_number: str) -> tuple[str, dict]:
+    sb = Statbotics()
+    return (team_number, sb.get_team_event(int(team_number), config.TBA_EVENT_KEY))
 
 
 def add_rankings(team_data: dict):
@@ -22,9 +57,9 @@ def add_rankings(team_data: dict):
     for display_name, attr in categories.items():
         def get_key(input):
             _, team = input
-            value = getattr(team, attr)
+            key = getattr(team, attr)
 
-            return value
+            return key
 
         rankings[display_name] = sorted(list(team_data.items()), key=get_key, reverse=True)
 

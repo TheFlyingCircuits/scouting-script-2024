@@ -68,9 +68,14 @@ class MainSheet:
     def add_rankings(self, ws: Worksheet, top_left_cell: tuple[int, int]):
         top_left_col, top_left_row = top_left_cell
 
-        breakpoint()
+        for column, (category, ranks) in enumerate(self.rankings.items()):
+            column_title_cell_str = get_cell_str(top_left_col + column, top_left_row)
+            ws[column_title_cell_str] = category
+            ws[column_title_cell_str].alignment = _centered_alignment
 
-        # TODO:
+            for row, (team_number, _) in enumerate(ranks, 1):
+                cell_str = get_cell_str(top_left_col + column, top_left_row + row)
+                ws[cell_str] = int(team_number)  # type: ignore
 
 
 class TeamSheet:
@@ -84,8 +89,8 @@ class TeamSheet:
         self.add_match_data(ws, (1, 40))
         self.add_rankings(ws, (1, 1))
         self.add_ratings(ws, (4, 1))
-        self.add_notes_per_match(ws, (1, 8))
-        self.add_amp_vs_speaker(ws, (10, 8))
+        self.add_notes_per_match(ws, (4, 8))
+        self.add_amp_vs_speaker(ws, (13, 8))
 
     def add_match_data(self, ws: Worksheet, top_left_cell: tuple[int, int]):
         top_left_col, top_left_row = top_left_cell

@@ -10,31 +10,32 @@ class Match:
     """
 
     def __init__(self, row):
-        self.match_number = int(row[3])
+        self.match_number = int(row[4])
 
-        if row[4].lower() == "yes":
+        if row[5].lower() == "yes":
             self.left_starting_zone = True
         else:
             self.left_starting_zone = False
 
-        self.notes_scored_in_amp_auto = load.extract_max_value(row[5])
-        self.notes_scored_in_speaker_auto = load.extract_max_value(row[6])
-        self.notes_scored_in_amp_tele = load.extract_max_value(row[7])
-        self.notes_scored_in_speaker_tele = load.extract_max_value(row[8])
-        self.parked = (row[9] == "Yes")
-        self.onstage_without_harmony = row[10]
-        self.onstage_with_harmony = row[11]
-        self.notes_scored_in_trap = load.extract_max_value(row[12])
-        self.defense = (row[13] == "Yes")
-        self.rating_auto = row[14]
-        self.rating_speed = row[15]
-        self.rating_pickup = row[16]
-        self.rating_scoring = row[17]
-        self.rating_driver = row[18]
-        self.rating_balance = row[19]
-        self.rating_pick = row[20]
-        self.comments_broken = row[21]
-        self.comments_details = row[22]
+        self.notes_scored_in_amp_auto = load.extract_max_value(row[6])
+        self.notes_scored_in_speaker_auto = load.extract_max_value(row[7])
+        self.notes_scored_in_amp_tele = load.extract_max_value(row[8])
+        self.notes_scored_in_speaker_tele = load.extract_max_value(row[9])
+        self.parked = (row[10] == "Yes")
+        self.onstage_without_harmony = row[11]
+        self.onstage_with_harmony = row[12]
+        self.notes_scored_in_trap = load.extract_max_value(row[13])
+        self.defense = (row[14] == "Yes")
+        self.rating_auto = row[15]
+        self.rating_speed = row[16]
+        self.rating_pickup = row[17]
+        self.rating_scoring = row[18]
+        self.rating_driver = row[19]
+        self.rating_balance = row[20]
+        self.rating_pick = row[21]
+        self.comments_broken = row[22]
+        self.comments_details = row[23]
+        self.commenter = row[2]
 
     def to_list(self) -> list:
         return list(self.__dict__.values())
