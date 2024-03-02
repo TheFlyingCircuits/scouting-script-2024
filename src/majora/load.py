@@ -14,7 +14,7 @@ def load_all_team_data(field_data_path: Path, pit_data_path: Path):
     team_data = {}
 
     load_field_scouting_data(team_data, field_data_path)
-    # add_pit_scouting_data(team_data, pit_data_path)
+    add_pit_scouting_data(team_data, pit_data_path)
 
     return team_data
 

@@ -2,19 +2,14 @@ from pathlib import Path
 
 from majora import config, filtering, generate, load, stats
 
-# If the script cant open one of these files, try changing the file name here
-REPO_ROOT = Path(__file__).parent
-FIELD_DATA_CSV_PATH: Path = Path(REPO_ROOT, "data", "[PITTSBURGH] Field Scouting.csv")
-PIT_DATA_CSV_PATH: Path = Path(REPO_ROOT, "data", "[PITTSBURGH] Pit Scouting.csv")
-
 
 def main():
     print(f"Running for event: {config.TBA_EVENT_KEY}")
 
-    team_data = load.load_all_team_data(FIELD_DATA_CSV_PATH, PIT_DATA_CSV_PATH)
+    team_data = load.load_all_team_data(config.FIELD_DATA_CSV_PATH, config.PIT_DATA_CSV_PATH)
     rankings = stats.add_statistics(team_data)
     filtering.filter_out_the_crap(team_data, rankings)
-    generate.generate_spreadsheet(team_data, rankings, "output.xlsx")
+    generate.generate_spreadsheet("output.xlsx", team_data, rankings)
 
     print("> Finished running.")
 

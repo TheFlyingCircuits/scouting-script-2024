@@ -1,15 +1,17 @@
+from majora.stats import DayFilter
 from majora.team import Team
 from openpyxl import Workbook
 from openpyxl.chart import LineChart, PieChart, Reference
 from openpyxl.chart.trendline import Trendline
-from openpyxl.styles import Alignment
+from openpyxl.styles import Alignment, PatternFill
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
 _centered_alignment = Alignment(vertical="center", horizontal="center", wrap_text=True)
+_green_fill = PatternFill(start_color="CEEBCE", fill_type="solid")
 
 
-def generate_spreadsheet(team_data, rankings, filename):
+def generate_spreadsheet(filename, team_data, rankings):
     """
     Notes:
     - Take some of the qualitative data (Good/OK/Bad) and make it quantitative
@@ -38,17 +40,20 @@ def generate_spreadsheet(team_data, rankings, filename):
     - Climb %
 
     SATURDAY TODO:
-    - Mr. Rice's Metric: Average of (fast, driver decisiveness, speaker in teleop)
-        - Use the pit scouting data to color the swerve teams
-    - Filter for just the last several matches, separate rankings
-        - Saturday only rankings
-        - Track the change in (rank? stats?) from friday to saturday
+    X Mr. Rice's Metric: Average of (fast, driver decisiveness, speaker in teleop)
+        X Use the pit scouting data to color the swerve teams
+        X Normalize the data to the same scale
+    X Filter for just the last several matches, separate rankings
+        X Saturday only rankings
+            X Same sheet as main
+    - Track the change in (rank? stats?) from friday to saturday
+    - Defense %
 
     """
     wb = Workbook()
 
-    main_sheet = MainSheet(team_data, rankings)
-    main_sheet.add_to_workbook(wb)
+    main_ranking_sheet = RankingSheet(team_data, rankings)
+    main_ranking_sheet.add_to_workbook(wb)
 
     sorted_teams = sorted(list(team_data.items()), key=lambda x: int(x[0]))
 
@@ -63,7 +68,7 @@ def get_cell_str(col: int, row: int) -> str:
     return f"{get_column_letter(col)}{row}"
 
 
-class MainSheet:
+class RankingSheet:
 
     def __init__(self, team_data: dict, rankings: dict) -> None:
         self.team_data = team_data
@@ -78,6 +83,7 @@ class MainSheet:
     def add_rankings(self, ws: Worksheet, top_left_cell: tuple[int, int]):
         top_left_col, top_left_row = top_left_cell
 
+        # Combined rankings
         for group_num, (category, ranks) in enumerate(self.rankings.items()):
             column = group_num * 3
             # TODO:
@@ -85,11 +91,15 @@ class MainSheet:
             ws[column_title_cell_str] = category
             ws[column_title_cell_str].alignment = _centered_alignment
 
-            for row, (team_number, _, value) in enumerate(ranks, 1):
+            for row, (team_number, team, value) in enumerate(ranks, 1):
                 team_cell_str = get_cell_str(top_left_col + column, top_left_row + row)
                 ws[team_cell_str] = int(team_number)  # type: ignore
                 value_cell_str = get_cell_str(top_left_col + column + 1, top_left_row + row)
                 ws[value_cell_str] = round(value, 2)
+
+                if team.pits.drive_train == "Swerve":
+                    ws[team_cell_str].fill = _green_fill
+                    ws[value_cell_str].fill = _green_fill
 
 
 class TeamSheet:
@@ -216,7 +226,7 @@ class TeamSheet:
             ws[title_cell_str] = col_title
             ws[title_cell_str].alignment = _centered_alignment
             value_cell_str = get_cell_str(top_left_col + index, top_left_row + 2)
-            ws[value_cell_str] = round(getattr(self.team, attr), 2)
+            ws[value_cell_str] = round(getattr(self.team, attr)(DayFilter.COMBINED), 2)
 
     def add_notes_per_match(self, ws: Worksheet, top_left_cell: tuple[int, int]):
         top_left_col, top_left_row = top_left_cell
@@ -258,7 +268,7 @@ class TeamSheet:
         chart.add_data(data, titles_from_data=True)
 
         total_notes_series = chart.series[0]
-        total_notes_series.trendline = Trendline(dispRSqr=True)
+        total_notes_series.trendline = Trendline(dispEq=True)
 
         ws.add_chart(chart, get_cell_str(top_left_col, top_left_row))
 
@@ -268,12 +278,13 @@ class TeamSheet:
         amp_title_cell_str = get_cell_str(top_left_col, top_left_row)
         ws[amp_title_cell_str] = "Amp Notes"
         amp_value_cell_str = get_cell_str(top_left_col + 1, top_left_row)
-        ws[amp_value_cell_str] = self.team.total_notes_amp  # type: ignore
+        ws[amp_value_cell_str] = self.team.total_notes_amp(DayFilter.COMBINED)  # type: ignore
 
         speaker_title_cell_str = get_cell_str(top_left_col, top_left_row + 1)
         ws[speaker_title_cell_str] = "Speaker Notes"
         speaker_value_cell_str = get_cell_str(top_left_col + 1, top_left_row + 1)
-        ws[speaker_value_cell_str] = self.team.total_notes_speaker  # type: ignore
+        ws[speaker_value_cell_str] = self.team.total_notes_speaker(  # type: ignore
+            DayFilter.COMBINED)  # type: ignore
 
         chart = PieChart()
         chart.title = "Amp vs. Speaker"
@@ -289,6 +300,7 @@ class TeamSheet:
         ws.add_chart(chart, get_cell_str(top_left_col, top_left_row))
 
     def add_pit_scouting(self, ws: Worksheet, top_left_cell: tuple[int, int]):
+        # TODO:
         ...
 
     def add_defense(self, ws: Worksheet, top_left_cell: tuple[int, int]):

@@ -1,13 +1,22 @@
 import time
+from copy import deepcopy
+from enum import Enum
 
 import gevent
 from statbotics import Statbotics
 
-from majora import config
+from majora import config, filtering
 
 
 class TeamStats:
     rankings: dict
+
+
+class DayFilter(Enum):
+    FRIDAY = 0
+    SATURDAY = 1
+    COMBINED = 2
+    LAST_3 = 3
 
 
 def add_statistics(team_data: dict):
@@ -45,21 +54,56 @@ def get_statbotics_for_team(team_number: str) -> tuple[str, dict]:
 
 def add_rankings(team_data: dict):
     categories = {
-        "Auto Notes": "avg_notes_auto",
-        "Tele Notes": "avg_notes_tele",
-        "Amp Notes": "avg_notes_amp",
-        "Speaker Notes": "avg_notes_speaker",
-        "Avg. EPA": "avg_epa",
-        "Final EPA": "end_epa"
+        "Auto Notes Friday": ("avg_notes_auto", DayFilter.FRIDAY),
+        "Tele Notes Friday": ("avg_notes_tele", DayFilter.FRIDAY),
+        "Amp Notes Friday": ("avg_notes_amp", DayFilter.FRIDAY),
+        "Speaker Notes Friday": ("avg_notes_speaker", DayFilter.FRIDAY),
+        "Defense % Friday": ("defense_pct", DayFilter.FRIDAY),
+        "FAST! Friday": ("avg_rating_speed", DayFilter.FRIDAY),
+        "DECISIVE! Friday": ("avg_rating_driver", DayFilter.FRIDAY),
+        "SPEAKER TELE! Friday": ("avg_speaker_tele_notes", DayFilter.FRIDAY),
+        "RICE SCORE! Friday": ("rice_score", DayFilter.FRIDAY),
+
+        "Avg. EPA (All Days)": ("avg_epa", DayFilter.COMBINED),
+
+        "Auto Notes Saturday": ("avg_notes_auto", DayFilter.SATURDAY),
+        "Tele Notes Saturday": ("avg_notes_tele", DayFilter.SATURDAY),
+        "Amp Notes Saturday": ("avg_notes_amp", DayFilter.SATURDAY),
+        "Speaker Notes Saturday": ("avg_notes_speaker", DayFilter.SATURDAY),
+        "Defense % Saturday": ("defense_pct", DayFilter.SATURDAY),
+        "FAST! Saturday": ("avg_rating_speed", DayFilter.SATURDAY),
+        "DECISIVE! Saturday": ("avg_rating_driver", DayFilter.SATURDAY),
+        "SPEAKER TELE! Saturday": ("avg_speaker_tele_notes", DayFilter.SATURDAY),
+        "RICE SCORE! Saturday": ("rice_score", DayFilter.SATURDAY),
+
+        "Auto Notes Last 3": ("avg_notes_auto", DayFilter.LAST_3),
+        "Tele Notes Last 3": ("avg_notes_tele", DayFilter.LAST_3),
+        "Amp Notes Last 3": ("avg_notes_amp", DayFilter.LAST_3),
+        "Speaker Notes Last 3": ("avg_notes_speaker", DayFilter.LAST_3),
+        "Defense % Last 3": ("defense_pct", DayFilter.LAST_3),
+        "FAST! Last 3": ("avg_rating_speed", DayFilter.LAST_3),
+        "DECISIVE! Last 3": ("avg_rating_driver", DayFilter.LAST_3),
+        "SPEAKER TELE! Last 3": ("avg_speaker_tele_notes", DayFilter.LAST_3),
+        "RICE SCORE! Last 3": ("rice_score", DayFilter.LAST_3),
+
+        "Auto Notes Combined": ("avg_notes_auto", DayFilter.COMBINED),
+        "Tele Notes Combined": ("avg_notes_tele", DayFilter.COMBINED),
+        "Amp Notes Combined": ("avg_notes_amp", DayFilter.COMBINED),
+        "Speaker Notes Combined": ("avg_notes_speaker", DayFilter.COMBINED),
+        "Defense % Combined": ("defense_pct", DayFilter.COMBINED),
+        "FAST! Combined": ("avg_rating_speed", DayFilter.COMBINED),
+        "DECISIVE! Combined": ("avg_rating_driver", DayFilter.COMBINED),
+        "SPEAKER TELE! Combined": ("avg_speaker_tele_notes", DayFilter.COMBINED),
+        "RICE SCORE! Combined": ("rice_score", DayFilter.COMBINED),
     }
 
     rankings = {}
 
     # Calculate rankings per category
-    for display_name, attr in categories.items():
+    for display_name, (attr, competition_day) in categories.items():
 
         attr_data_by_team = [
-            (team_number, team, getattr(team, attr))
+            (team_number, team, getattr(team, attr)(competition_day))
             for team_number, team in team_data.items()
         ]
 
@@ -75,9 +119,7 @@ def add_rankings(team_data: dict):
         for team_number in team_data.keys()}
 
     for category, ranks in rankings.items():
-        for index, (team_number, _, value) in enumerate(ranks, 1):
-            # breakpoint()
-            # TODO:
+        for index, (team_number, _, _) in enumerate(ranks, 1):
             team_rank_info[team_number][category] = index
 
     # Write each team's ranking to its team object
