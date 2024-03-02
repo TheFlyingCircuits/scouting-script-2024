@@ -48,20 +48,26 @@ def add_rankings(team_data: dict):
         "Auto Notes": "avg_notes_auto",
         "Tele Notes": "avg_notes_tele",
         "Amp Notes": "avg_notes_amp",
-        "Speaker Notes": "avg_notes_speaker"
+        "Speaker Notes": "avg_notes_speaker",
+        "Avg. EPA": "avg_epa",
+        "Final EPA": "end_epa"
     }
 
     rankings = {}
 
     # Calculate rankings per category
     for display_name, attr in categories.items():
+
+        attr_data_by_team = [
+            (team_number, team, getattr(team, attr))
+            for team_number, team in team_data.items()
+        ]
+
         def get_key(input):
-            _, team = input
-            key = getattr(team, attr)
+            _, _, value = input
+            return value
 
-            return key
-
-        rankings[display_name] = sorted(list(team_data.items()), key=get_key, reverse=True)
+        rankings[display_name] = sorted(attr_data_by_team, key=get_key, reverse=True)
 
     # Group rankings by team
     team_rank_info = {
@@ -69,7 +75,9 @@ def add_rankings(team_data: dict):
         for team_number in team_data.keys()}
 
     for category, ranks in rankings.items():
-        for index, (team_number, _) in enumerate(ranks, 1):
+        for index, (team_number, _, value) in enumerate(ranks, 1):
+            # breakpoint()
+            # TODO:
             team_rank_info[team_number][category] = index
 
     # Write each team's ranking to its team object

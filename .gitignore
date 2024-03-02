@@ -3,6 +3,9 @@
 auth.json
 *.xlsx
 *.csv
+openpyxl
+.venv
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

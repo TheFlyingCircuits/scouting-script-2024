@@ -1,10 +1,10 @@
+from majora.team import Team
 from openpyxl import Workbook
 from openpyxl.chart import LineChart, PieChart, Reference
+from openpyxl.chart.trendline import Trendline
 from openpyxl.styles import Alignment
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
-
-from majora.team import Team
 
 _centered_alignment = Alignment(vertical="center", horizontal="center", wrap_text=True)
 
@@ -29,10 +29,20 @@ def generate_spreadsheet(team_data, rankings, filename):
     - How well did their teammates do in their matches?
     - How well did their opponents do in their matches?
     - One number to rule them all?
-
-
     - 3 AI generated personalities that give a review of each robot
 
+
+    PITTSBURGH TODO:
+    - Slope of pts per match
+    - Defense % TODO:
+    - Climb %
+
+    SATURDAY TODO:
+    - Mr. Rice's Metric: Average of (fast, driver decisiveness, speaker in teleop)
+        - Use the pit scouting data to color the swerve teams
+    - Filter for just the last several matches, separate rankings
+        - Saturday only rankings
+        - Track the change in (rank? stats?) from friday to saturday
 
     """
     wb = Workbook()
@@ -68,14 +78,18 @@ class MainSheet:
     def add_rankings(self, ws: Worksheet, top_left_cell: tuple[int, int]):
         top_left_col, top_left_row = top_left_cell
 
-        for column, (category, ranks) in enumerate(self.rankings.items()):
+        for group_num, (category, ranks) in enumerate(self.rankings.items()):
+            column = group_num * 3
+            # TODO:
             column_title_cell_str = get_cell_str(top_left_col + column, top_left_row)
             ws[column_title_cell_str] = category
             ws[column_title_cell_str].alignment = _centered_alignment
 
-            for row, (team_number, _) in enumerate(ranks, 1):
-                cell_str = get_cell_str(top_left_col + column, top_left_row + row)
-                ws[cell_str] = int(team_number)  # type: ignore
+            for row, (team_number, _, value) in enumerate(ranks, 1):
+                team_cell_str = get_cell_str(top_left_col + column, top_left_row + row)
+                ws[team_cell_str] = int(team_number)  # type: ignore
+                value_cell_str = get_cell_str(top_left_col + column + 1, top_left_row + row)
+                ws[value_cell_str] = round(value, 2)
 
 
 class TeamSheet:
@@ -188,6 +202,7 @@ class TeamSheet:
             "Driver": "avg_rating_driver",
             "Balance": "avg_rating_balance",
             "Pick": "avg_rating_pick",
+            "Overall": "avg_rating_overall"
         }
 
         ws.merge_cells(start_row=top_left_row, start_column=top_left_col,
@@ -242,6 +257,9 @@ class TeamSheet:
                          min_row=top_left_row, max_row=top_left_row + len(self.team.matches))
         chart.add_data(data, titles_from_data=True)
 
+        total_notes_series = chart.series[0]
+        total_notes_series.trendline = Trendline(dispRSqr=True)
+
         ws.add_chart(chart, get_cell_str(top_left_col, top_left_row))
 
     def add_amp_vs_speaker(self, ws: Worksheet, top_left_cell: tuple[int, int]):
@@ -271,16 +289,10 @@ class TeamSheet:
         ws.add_chart(chart, get_cell_str(top_left_col, top_left_row))
 
     def add_pit_scouting(self, ws: Worksheet, top_left_cell: tuple[int, int]):
-        # TODO:
         ...
 
     def add_defense(self, ws: Worksheet, top_left_cell: tuple[int, int]):
-        ...
-
-    def add_council(self, ws: Worksheet, top_left_cell: tuple[int, int]):
-        ...
-
-    def add_statbotics(self, ws: Worksheet, top_left_cell: tuple[int, int]):
+        # TODO:
         ...
 
     def add_tba(self, ws: Worksheet, top_left_cell: tuple[int, int]):
@@ -292,5 +304,8 @@ class TeamSheet:
     def add_opponent_quality(self, ws: Worksheet, top_left_cell: tuple[int, int]):
         ...
 
-    def add_comments_summary(self, ws: Worksheet, top_left_cell: tuple[int, int]):
+    def add_council(self, ws: Worksheet, top_left_cell: tuple[int, int]):
+        ...
+
+    def add_statbotics(self, ws: Worksheet, top_left_cell: tuple[int, int]):
         ...

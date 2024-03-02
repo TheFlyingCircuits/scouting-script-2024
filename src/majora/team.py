@@ -136,3 +136,20 @@ class Team:
     @property
     def total_notes_speaker(self):
         return sum([match.total_notes_speaker for match in self.matches])
+
+    @property
+    def start_epa(self):
+        return self.statbotics["epa_start"]
+
+    @property
+    def avg_epa(self):
+        return self.statbotics["epa_mean"]
+
+    @property
+    def end_epa(self):
+        return self.statbotics["epa_end"]
+
+    @property
+    def avg_rating_overall(self):
+        return (self.avg_rating_auto + self.avg_rating_balance + self.avg_rating_driver + self.avg_rating_pick + self.avg_rating_pickup +
+                self.avg_rating_speed + self.avg_rating_scoring) / 7
