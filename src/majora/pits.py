@@ -18,7 +18,7 @@ class Pits:
     def update(self, row: list):
         # self.weight = row[3]
         # self.speed = row[4]
-        self.drive_train = row[5]
+        self.drive_train = row[6]
         # self.robot_abilities = row[6].split(";")
         # self.can_leave_starting_zone = (row[7] == "Yes")
         # # Skip notes they say they can score, which is columns 8 and 9
